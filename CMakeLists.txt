@@ -1,33 +1,17 @@
-## Get all variables visible to CMake and print them
-## Source: https://stackoverflow.com/a/9328525/3214870
-## get_cmake_property(_variableNames VARIABLES)
-## list(SORT _variableNames)
-## foreach (_variableName ${_variableNames})
-##     message(STATUS "${_variableName}=${${_variableName}}")
-## endforeach ()
-
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.3)
 project(tetris)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${tetris_SOURCE_DIR}/cmake)
+set(CMAKE_C_STANDARD 99)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# SDL2
-FIND_PACKAGE(SDL2 REQUIRED)
-INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
-
-# SDL2 Gfx
-FIND_PACKAGE(SDL2_gfx REQUIRED)
-INCLUDE_DIRECTORIES(${SDL2_GFX_INCLUDE_DIRS})
-
-
+# find SDL2
+include(cmake/sdl2.cmake)
+message(STATUS "SDL2 include dir: ${SDL2_ALL_INC}")
+message(STATUS "SDL2 all libraries: ${SDL2_ALL_LIBS}")
+include_directories(${SDL2_ALL_INC})
 include_directories(.)
 
 add_executable(tetris main.c pieces.inl primlib.c primlib.h game.c game.h audio/audio.h audio/audio.c userInterface.c userInterface.h)
+target_link_libraries(${PROJECT_NAME} ${SDL2_ALL_LIBS} m)
 
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_GFX_LIBRARIES})
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/music $<TARGET_FILE_DIR:${PROJECT_NAME}>/music)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/music/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/music/)
